@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>West Sumba Interactive Map</title>
+    <!-- Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/solid.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/regular.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/brands.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            /* Airbnb-inspired color palette */
+            --primary-color: #FF5A5F;
+            --text-dark: #484848;
+            --text-light: #767676;
+            --background-light: #F7F7F7;
+            --white: #FFFFFF;
+            
+            /* Icon colors */
+            --icon-water: #00A699;    /* Airbnb teal */
+            --icon-cliff: #FC642D;    /* Airbnb coral */
+            --icon-house: #914669;    /* Airbnb purple */
+            --icon-wave: #008489;     /* Airbnb blue */
+            --icon-hill: #82B548;     /* Airbnb green */
+            --icon-waterfall: #00A699; /* Airbnb teal */
+            --icon-bed: #914669;      /* Airbnb purple */
+            --icon-tomb: #767676;     /* Airbnb gray */
+            --icon-transport: #4A4A4A; /* Dark gray for transport */
+            --icon-park: #2D8A39;     /* Green for parks */
+            --icon-river: #2389DA;    /* Blue for rivers */
+            --icon-dining: #FF5A5F;    /* Red for dining */
+            --icon-surf: #008489;     /* Blue for surf spots */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-dark);
+            background-color: var(--background-light);
+        }
+
+        #map-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            background-color: #BDDDFC;
+        }
+
+        /* Hide unnecessary map features */
+        .leaflet-control-attribution {
+            display: none;
+        }
+
+        /* Enhance map controls */
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+            border-radius: 8px !important;
+            overflow: hidden;
+            margin-right: 24px !important;
+            margin-top: 24px !important;
+        }
+
+        .leaflet-control-zoom a {
+            color: #484848 !important;
+            background-color: #ffffff !important;
+            width: 32px !important;
+            height: 32px !important;
+            line-height: 32px !important;
+            font-size: 16px !important;
+            font-weight: 500 !important;
+            transition: all 0.2s ease;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: #f7f7f7 !important;
+            color: #222222 !important;
+        }
+
+        /* Style map features */
+        .leaflet-interactive {
+            transition: all 0.2s ease;
+        }
+
+        /* Popup styling */
+        .leaflet-popup {
+            margin-bottom: 20px;
+        }
+
+        .leaflet-popup.calculating {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .leaflet-popup-tip-container {
+            display: none;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 300px !important;
+        }
+
+        .leaflet-popup-close-button {
+            color: #767676 !important;
+            font-size: 20px !important;
+            font-weight: 400 !important;
+            padding: 8px 12px !important;
+            transition: color 0.2s ease;
+        }
+
+        .leaflet-popup-close-button:hover {
+            color: #222222 !important;
+            background: none !important;
+        }
+
+        /* Location markers */
+        .location-marker {
+            width: 24px !important;
+            height: 24px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .location-marker .material-icons,
+        .location-marker .fas,
+        .location-marker .far,
+        .location-marker .fab,
+        .location-marker .bi,
+        .location-marker .lucide {
+            font-size: 14px;
+            line-height: 1;
+            margin: 0;
+            padding: 0;
+            color: inherit;
+        }
+
+        /* Icon colors */
+        .icon-water, .icon-waterfall { 
+            color: var(--icon-water) !important;
+        }
+
+        .icon-cliff { 
+            color: var(--icon-cliff) !important;
+        }
+
+        .icon-house { 
+            color: var(--icon-house) !important;
+        }
+
+        .icon-wave { 
+            color: var(--icon-wave) !important;
+        }
+
+        .icon-hill { 
+            color: var(--icon-hill) !important;
+        }
+
+        .icon-bed { 
+            color: var(--icon-house) !important;
+        }
+
+        .icon-tomb { 
+            color: var(--icon-tomb) !important;
+        }
+
+        .icon-transport { 
+            color: var(--icon-transport) !important;
+        }
+
+        .icon-park { 
+            color: var(--icon-park) !important;
+        }
+
+        .icon-river { 
+            color: var(--icon-river) !important;
+        }
+
+        .icon-dining { 
+            color: var(--icon-dining) !important;
+        }
+
+        .icon-surf { 
+            color: var(--icon-surf) !important;
+        }
+
+        .icon-horse { 
+            color: var(--icon-cliff) !important;
+        }
+
+        /* Icon library container */
+        .icon-library {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Popup styling */
+        .leaflet-popup {
+            margin-bottom: 20px;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            overflow: hidden;
+        }
+
+        .leaflet-popup-content {
+            margin: 0;
+            width: 300px !important;
+        }
+
+        .location-popup {
+            background: var(--white);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 200px;
+            background-color: var(--background-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 14px;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .popup-content {
+            padding: 20px;
+        }
+
+        .popup-content h3 {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .popup-content p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        /* Travel time button */
+        .travel-time-btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin-top: 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .travel-time-btn:hover {
+            background-color: #FF4B4F;
+        }
+
+        /* Distance overlay styling */
+        .distance-overlay {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            padding: 24px;
+        }
+
+        .distance-overlay-content h3 {
+            color: var(--text-dark);
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .distance-overlay-content h4 {
+            color: var(--text-dark);
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .distance-overlay-content p {
+            color: var(--text-light);
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 16px;
+        }
+
+        /* Remove tooltip and bounce animation styles */
+        .location-tooltip {
+            display: none;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0) scale(1.1);
+            }
+            50% {
+                transform: translateY(-5px) scale(1.1);
+            }
+        }
+
+        /* Remove these styles that were causing positioning issues */
+        .custom-div-icon {
+            display: none;
+        }
+
+        .custom-div-icon .location-marker {
+            display: none;
+        }
+
+        .custom-div-icon .icon-library {
+            display: none;
+        }
+
+        /* Distance overlay */
+        .distance-overlay {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            transform: none;
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-dark);
+            display: none;
+            z-index: 1000;
+            text-align: left;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+            min-width: 320px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .distance-overlay.active {
+            display: block;
+        }
+
+        .distance-overlay-content {
+            margin-right: 20px;
+        }
+
+        .distance-overlay-content h3 {
+            color: var(--text-dark);
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .distance-overlay-content h4 {
+            color: var(--text-dark);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .location-details {
+            margin-bottom: 24px;
+        }
+
+        .travel-details {
+            background-color: var(--background-light);
+            padding: 16px;
+            border-radius: 8px;
+        }
+
+        .travel-details div {
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .distance-overlay-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .distance-overlay-close:hover {
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 768px) {
+            .distance-overlay {
+                max-width: 90%;
+                min-width: auto;
+                margin: 0 20px;
+                top: 10px;
+                left: 10px;
+            }
+        }
+
+        /* Reset button */
+        .reset-button {
+            position: fixed;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+            z-index: 1000;
+            transition: background-color 0.2s ease;
+        }
+
+        .reset-button:hover {
+            background-color: #FF4B4F;
+        }
+
+        .reset-button.active {
+            display: block;
+        }
+
+        /* Watermark */
+        .watermark {
+            position: fixed;
+            bottom: 16px;
+            right: 16px;
+            font-size: 12px;
+            color: var(--text-light);
+            background: var(--white);
+            padding: 6px 12px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        /* Selection prompt overlay */
+        .selection-prompt {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.95);
+            color: #484848;
+            padding: 16px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 400;
+            z-index: 9999;
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            min-width: 300px;
+            pointer-events: none;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .selection-prompt.active {
+            display: block;
+        }
+
+        .selection-prompt-subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-top: 8px;
+            font-weight: 400;
+        }
+
+        /* Welcome tip box */
+        .welcome-tip {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            z-index: 1000;
+                max-width: 90%;
+            width: 400px;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .welcome-tip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .welcome-tip-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 18px;
+        }
+
+        .welcome-tip-close {
+            background: none;
+            border: none;
+            color: #000000;
+            cursor: pointer;
+            padding: 4px;
+            font-size: 18px;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .welcome-tip-close:hover {
+            color: #333333;
+        }
+
+        .welcome-tip-content {
+            color: var(--text-dark);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0;
+                transform: translate(-50%, -40%);
+            }
+            to { 
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* Add overlay behind welcome tip */
+        .welcome-tip-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+
+        /* Cliff area styling */
+        .cliff-area-label {
+            background: none;
+            border: none;
+            box-shadow: none;
+            font-weight: 400;
+            color: #666;
+            font-size: 9px;
+            padding: 0;
+            white-space: nowrap;
+            letter-spacing: 0.2px;
+            text-align: center;
+        }
+
+        .location-marker.icon-cliff {
+            background-color: white;
+            border: none;
+        }
+
+        .location-marker.icon-cliff .fa-solid {
+            color: var(--icon-cliff) !important;
+        }
+
+        .location-marker.icon-cliff .material-icons {
+            color: #FFFFFF;
+            font-size: 18px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            line-height: 1;
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Add styles for the directions link */
+        .directions-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 8px 16px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background-color 0.2s ease;
+        }
+
+        .directions-link:hover {
+            background-color: #FF4B4F;
+            color: white;
+            text-decoration: none;
+        }
+
+        .directions-link i {
+            font-size: 16px;
+        }
+
+        /* Add new styles for website link */
+        .website-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
+            margin-bottom: 12px;
+            padding: 4px 8px;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--text-dark);
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .website-link:hover {
+            background-color: rgba(255, 255, 255, 1);
+            color: var(--primary-color);
+            text-decoration: none;
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .website-link i {
+            font-size: 12px;
+            color: var(--primary-color);
+        }
+
+        .website-link:hover i {
+            color: var(--primary-color);
+        }
+
+        /* Custom icon sizes */
+        .icon-sm {
+            font-size: 14px;
+        }
+
+        .icon-md {
+            font-size: 18px;
+        }
+
+        .icon-lg {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map-container">
+        <div id="map"></div>
+        <div class="welcome-tip" id="welcome-tip">
+            <div class="welcome-tip-header">
+                <div class="welcome-tip-title">💡 TIP</div>
+                <button class="welcome-tip-close" onclick="closeWelcomeTip()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="welcome-tip-content">
+                <strong>Sumba Trip Planner</strong><br><br>
+                Click a location to learn more & Click <strong>'calculate travel time'</strong> to plan your route with ease.
+            </div>
+        </div>
+        <div class="distance-overlay" id="distance-overlay"></div>
+        <button class="reset-button" id="reset-button">Reset Selection</button>
+        <div class="watermark">Powered by: Sumba Sunset Cliff</div>
+        <div class="selection-prompt">Select the next point on the map to travel to</div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Add OSRM Routing Machine -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+    <script>
+        // Initialize Lucide icons globally
+        window.addEventListener('load', function() {
+            lucide.createIcons();
+        });
+
+        // Location data with exact coordinates
+        const locations = {
+            transport: [
+                {
+                    name: "Tambolaka Airport",
+                    position: [-9.4097, 119.2445],
+                    description: "Main gateway to West Sumba, serving domestic flights from major Indonesian cities. Essential transport hub for visitors.",
+                    icon: "fa-plane-departure",
+                    iconClass: "icon-transport",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Waikelo Port",
+                    position: [-9.391270, 119.219794],
+                    description: "The main port in West Sumba, serving as a gateway for ferries connecting the island to Flores and other nearby destinations. A hub for local trade and travel, the port offers a glimpse into daily island life, with fishing boats, cargo shipments, and passenger ferries arriving regularly.",
+                    icon: "fa-ship",
+                    iconClass: "icon-transport",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Waingapu Airport",
+                    position: [-9.669346, 120.298907],
+                    description: "The main airport in East Sumba, serving domestic flights from Bali, Kupang, and other Indonesian cities. Located near Waingapu, it provides easy access to Sumba's eastern region, including traditional villages, savannah landscapes, and remote beaches. A small but efficient airport, it's the starting point for many travelers exploring the island.",
+                    icon: "fa-plane-departure",
+                    iconClass: "icon-transport",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Waingapu Port",
+                    position: [-9.642880, 120.248430],
+                    description: "The largest port in Sumba, connecting the island to Flores, Timor, and other parts of Indonesia. A vital hub for trade and travel, it hosts passenger ferries, cargo ships, and fishing boats. Located in Waingapu, it provides easy access to East Sumba's cultural and natural attractions.",
+                    icon: "fa-ship",
+                    iconClass: "icon-transport",
+                    iconLibrary: "fa"
+                }
+            ],
+            natural: [],
+            tourist: [
+                {
+                    name: "Pantai Kerewei",
+                    position: [-9.761046, 119.331675],
+                    description: "A powerful and fast-breaking reef break, best for experienced surfers. This left-hand wave offers hollow sections and long rides, working best on mid to high tide with a solid southwest swell. Beyond surfing, the area around Pantai Kerewei is a beautiful escape with rugged cliffs, golden sand, and a peaceful, untouched feel.",
+                    icon: "fa-face-smile",
+                    iconClass: "icon-surf",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Pero Surf Break",
+                    position: [-9.607095, 118.985405],
+                    description: "A powerful and fast-breaking left-hand reef break that offers rides up to 100 meters or more on the right swell. With a solid southwest swell and mid to high tide, the wave lines up for long, fast rides with hollow sections and multiple turns. At lower tides, the sharp reef becomes more exposed, making it best suited for experienced surfers.",
+                    icon: "fa-face-smile",
+                    iconClass: "icon-surf",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Bukit Wairinding",
+                    position: [-9.679697, 120.101302],
+                    description: "A breathtaking hilltop offering panoramic views of Sumba's rolling savannah. During the wet season, the hills are lush and green, while in the dry season, they turn golden, creating a dramatic landscape. A popular spot for photography, picnics, and sunset watching, Bukit Wairinding showcases the island's untouched natural beauty.",
+                    icon: "fa-camera",
+                    iconClass: "icon-hill",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "RUA Beach",
+                    position: [-9.765129, 119.413771],
+                    description: "A serene stretch of golden sand with calm, crystal-clear waters. Perfect for a relaxing swim, beach walks, and enjoying stunning sunsets.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Weekuri Lake",
+                    position: [-9.491014, 118.959897],
+                    description: "A stunning saltwater lagoon with crystal-clear turquoise waters, perfect for swimming and photography amid lush cliffs.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Ratenggaro Village",
+                    position: [-9.627680, 119.002862],
+                    description: "A traditional Sumbanese village with towering thatched-roof houses and ancient megalithic tombs, showcasing rich cultural heritage.",
+                    icon: "fa-landmark",
+                    iconClass: "icon-house",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Mandorak Beach",
+                    position: [-9.498578, 118.954658],
+                    description: "A secluded white-sand beach framed by dramatic cliffs, ideal for relaxation and quiet exploration.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Lapopu Waterfall",
+                    position: [-9.678795, 119.492741],
+                    description: "One of the tallest waterfalls in East Nusa Tenggara, cascading down terraced rocks into a refreshing pool.",
+                    icon: "fa-camera",
+                    iconClass: "icon-waterfall",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Air Terjun Laindamuki",
+                    position: [-9.991977, 120.009692],
+                    description: "A hidden gem surrounded by lush jungle, this multi-tiered waterfall cascades into clear natural pools, perfect for a refreshing swim. The journey to the falls involves a short trek, offering stunning views of Sumba's untouched landscapes. A peaceful spot for nature lovers seeking adventure and tranquility.",
+                    icon: "fa-person-hiking",
+                    iconClass: "icon-waterfall",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Air Terjun Tanggedu",
+                    position: [-9.574912, 120.090483],
+                    description: "Known as the \"Grand Canyon of Sumba,\" this stunning waterfall features terraced rock formations and crystal-clear turquoise pools. A short trek through rolling hills leads to this hidden oasis, perfect for swimming and exploring. Its unique landscape makes it one of East Sumba's most picturesque natural attractions.",
+                    icon: "fa-person-hiking",
+                    iconClass: "icon-waterfall",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Air Terjun Wai Marang",
+                    position: [-9.963813, 120.601731],
+                    description: "A breathtaking hidden waterfall cascading into a turquoise-blue natural pool, surrounded by lush jungle. The short trek to reach it adds to the adventure, making it a perfect spot for swimming and enjoying Sumba's untouched beauty. A true tropical paradise for nature lovers.",
+                    icon: "fa-person-hiking",
+                    iconClass: "icon-waterfall",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Pantai Walakiri",
+                    position: [-9.628854, 120.427745],
+                    description: "A serene coastal gem famous for its iconic mangrove trees that create stunning silhouettes at sunset. With soft white sand and calm, shallow waters, it's perfect for a relaxing stroll or a swim. A must-visit for photographers and travelers seeking Sumba's unique natural beauty.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Pantai Tarimbang",
+                    position: [-9.972773, 119.945693],
+                    description: "A remote and breathtaking bay with pristine white sand, turquoise waters, and dramatic limestone cliffs. Known for its powerful surf break, it attracts experienced surfers, while its untouched beauty makes it perfect for those seeking solitude and nature. A true hidden paradise on Sumba's southern coast.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Wee Kacura",
+                    position: [-9.599430, 119.337033],
+                    description: "A natural spring with crystal-clear water, surrounded by lush greenery that looks like a scene from Avatar. Towering trees, vibrant foliage, and the serene atmosphere make it a magical hidden gem. Perfect for swimming and relaxing, it's an ideal stop for travelers seeking Sumba's untouched natural beauty.",
+                    icon: "fa-camera",
+                    iconClass: "icon-waterfall",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Pantai Hameli Ate",
+                    position: [-9.468209, 118.978852],
+                    description: "A secluded white sand beach with crystal-clear waters, surrounded by dramatic cliffs and untouched nature. Perfect for those seeking tranquility, this hidden paradise offers stunning views, great swimming spots, and a chance to experience Sumba's raw beauty without the crowds.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Secret Pool",
+                    position: [-9.431951, 119.040955],
+                    description: "Tucked away from the beaten path, Secret Pool is a hidden oasis where crystal-clear waters collect in a secluded rock pool, perfect for an exhilarating cliff jump or a refreshing dip. This secret spot feels like a scene from a dream—untouched, serene, and magical. When you need a break from the midday sun, pop in on your road trip.",
+                    icon: "fa-person-swimming",
+                    iconClass: "icon-wave",
+                    iconLibrary: "fa"
+                }
+            ],
+            hotels: [
+                {
+                    name: "Nihi Sumba",
+                    position: [-9.777723, 119.376266],
+                    description: "An award-winning luxury resort with exclusive villas, world-class surfing, and immersive cultural experiences.",
+                    icon: "fa-horse",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Lelewatu Resort Sumba",
+                    position: [-9.791145, 119.380839],
+                    description: "A five-star cliff-top resort with private villas and stunning Indian Ocean views, blending luxury with tradition.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Maringi Sumba",
+                    position: [-9.388661, 119.301532],
+                    description: "An eco-friendly boutique hotel supporting local development, offering a sustainable and unique stay.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Sanubari",
+                    position: [-9.751442, 119.307919],
+                    description: "A secluded beachfront resort offering luxury in harmony with nature. Nestled along a pristine stretch of sand, Sanubari provides private villas, breathtaking ocean views, and a peaceful escape from the crowds. Perfect for travelers seeking relaxation, adventure, and a true connection with Sumba's untouched beauty.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Ngalung Kalla Retreat",
+                    position: [-9.746430, 119.284601],
+                    description: "A remote eco-retreat surrounded by lush jungle and rugged coastline. Designed for travelers seeking sustainability and adventure, it offers off-grid bungalows, farm-to-table dining, and access to pristine beaches. Perfect for surfing, free diving, and immersing in Sumba's untouched nature.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Cap Karoso",
+                    position: [-9.529067, 118.935896],
+                    description: "A luxury eco-resort blending modern design with Sumba's natural beauty. Set on a pristine beachfront, it offers world-class dining, sustainable architecture, and immersive cultural experiences.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Mario Hotel",
+                    position: [-9.358636, 119.295182],
+                    description: "A beachfront hotel offering a blend of comfort and local charm. With stunning ocean views, a relaxing pool, and direct beach access, it's a perfect spot to unwind. The on-site restaurant serves fresh seafood and Indonesian dishes, making it a great stay for travelers exploring West Sumba.",
+                    icon: "fa-bed",
+                    iconClass: "icon-bed",
+                    iconLibrary: "fa"
+                }
+            ],
+            cultural: [
+                {
+                    name: "Praijing Village",
+                    position: [-9.642601, 119.431096],
+                    description: "A well-preserved village with traditional Sumbanese architecture and megalithic tombs, reflecting ancient customs.",
+                    icon: "fa-landmark",
+                    iconClass: "icon-house",
+                    iconLibrary: "fa"
+                },
+                {
+                    name: "Tarung Village",
+                    position: [-9.632962, 119.409889],
+                    description: "A populated area in Waikabubak, West Sumba, Indonesia.",
+                    icon: "fa-landmark",
+                    iconClass: "icon-house",
+                    iconLibrary: "fa"
+                }
+            ],
+            dining: [
+                {
+                    name: "Makan Dulu",
+                    position: [-9.431878, 119.244925],
+                    description: "More than just a restaurant, Makan Dulu is part of a hospitality school that trains local students in culinary and service skills. Serving delicious Indonesian and Western dishes, it offers a warm and welcoming atmosphere. A great spot for travelers to enjoy a hearty meal while supporting local education and community development.",
+                    icon: "fa-utensils",
+                    iconClass: "icon-dining",
+                    iconLibrary: "fa"
+                }
+            ]
+        };
+
+        let selectedLocations = [];
+        let map;
+        let routeLine = null;
+        let routingControl = null; // Add variable for routing control
+
+        function initMap() {
+            // Initialize map centered on West Sumba with adjusted center and zoom
+            map = L.map('map', {
+                zoomControl: true,
+                scrollWheelZoom: true,
+                dragging: true,
+                zoomSnap: 0.5,
+                zoomAnimation: true,
+                fadeAnimation: true,
+                markerZoomAnimation: true
+            }).setView([-9.6400, 119.3000], 10.5);  // Adjusted center to better show Pantai Kerewei
+
+            showWelcomeTip();
+
+            // Add the base map layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                maxZoom: 18,
+                minZoom: 8,
+                attribution: ''
+            }).addTo(map);
+
+            // Mark Sumba Sunset Cliff area
+            markCliffArea();
+
+            // Add all location markers
+            addLocationMarkers();
+        }
+
+        function createMarkerIcon(location) {
+            // Create the icon HTML based on the selected library
+            let iconHtml = '';
+            switch(location.iconLibrary) {
+                case 'material':
+                    iconHtml = `<span class="material-icons">${location.icon}</span>`;
+                    break;
+                case 'fa':
+                    iconHtml = `<i class="fa-solid ${location.icon}"></i>`;
+                    break;
+                case 'bi':
+                    iconHtml = `<i class="bi ${location.icon}"></i>`;
+                    break;
+                case 'lucide':
+                    iconHtml = `<i class="lucide lucide-${location.icon}" style="width: 18px; height: 18px;"></i>`;
+                    break;
+                default:
+                    iconHtml = `<span class="material-icons">${location.icon}</span>`;
+            }
+
+            const icon = L.divIcon({
+                className: `location-marker ${location.iconClass}`,
+                html: `<div class="icon-library">${iconHtml}</div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16]
+            });
+
+            // Initialize Lucide icons after creating the icon
+            if (location.iconLibrary === 'lucide') {
+                setTimeout(() => lucide.createIcons(), 0);
+            }
+
+            return icon;
+        }
+
+        function markCliffArea() {
+            // Fixed coordinates for Sumba Sunset Cliff area
+            const cliffStart = [-9.425511, 119.054617];
+            const cliffEnd = [-9.425511, 119.054617];
+
+            // Calculate the center point between the two markers
+            const centerPoint = [-9.425511, 119.054617];
+
+            // Create icon for the main marker with proper anchoring
+            const cliffIcon = L.divIcon({
+                className: `location-marker icon-cliff`,
+                html: `<div class="icon-library"><i class="fa-solid fa-sun"></i></div>`,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16],
+                popupAnchor: [0, -16]
+            });
+
+            // Create virtual location object for the cliff
+            const cliffLocation = {
+                name: "Sumba Sunset Cliff",
+                position: centerPoint,
+                description: "A stunning oceanfront getaway set to become a top spot in West Sumba. Sitting on a high coastal cliff, this hidden gem offers wide-open sunset views over the endless blue sea. With its clear waters, rich marine life, and peaceful surroundings, it's a perfect place for snorkeling, swimming, and relaxing in nature."
+            };
+
+            // Create marker with adjusted options
+            const marker = L.marker(centerPoint, { 
+                icon: cliffIcon,
+                riseOnHover: true,
+                riseOffset: 500,
+                zIndexOffset: 1000
+            })
+            .addTo(map)
+            .bindPopup(createPopupContent(cliffLocation), {
+                maxWidth: 300,
+                className: 'custom-popup',
+                closeButton: true,
+                closeOnClick: false,
+                autoClose: true
+            });
+
+            // Add click handler that prevents popups during travel time calculation
+            marker.on('click', () => {
+                // Close travel information window if it's open
+                const distanceOverlay = document.getElementById('distance-overlay');
+                if (distanceOverlay && distanceOverlay.classList.contains('active')) {
+                    distanceOverlay.classList.remove('active');
+                    // Remove the route line and routing control if they exist
+                    if (routeLine) {
+                        map.removeLayer(routeLine);
+                        routeLine = null;
+                    }
+                    if (routingControl) {
+                        map.removeControl(routingControl);
+                        routingControl = null;
+                    }
+                }
+
+                if (calculatingTravelTime) {
+                    // Close any open popups first
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Marker) {
+                            layer.closePopup();
+                        }
+                    });
+                    handleMarkerClick(cliffLocation, marker);
+                } else {
+                    // Close any open popups first
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Marker) {
+                            layer.closePopup();
+                        }
+                    });
+                    marker.openPopup();
+                }
+            });
+
+            // Override the default popup opening behavior
+            marker.off('popupopen').on('popupopen', (e) => {
+                if (calculatingTravelTime) {
+                    // Prevent popup from opening during travel time calculation
+                    marker.closePopup();
+                }
+            });
+        }
+
+        function addLocationMarkers() {
+            Object.values(locations).flat().forEach(location => {
+                // Add default icon library if not specified
+                location.iconLibrary = location.iconLibrary || 'material';
+                
+                const marker = L.marker(location.position, { 
+                    icon: createMarkerIcon(location),
+                    riseOnHover: true,
+                    riseOffset: 500,
+                    zIndexOffset: 1000
+                })
+                .addTo(map)
+                .bindPopup(createPopupContent(location), {
+                    maxWidth: 300,
+                    className: 'custom-popup',
+                    closeButton: true,
+                    closeOnClick: false,
+                    autoClose: true
+                });
+
+                // Add click handler that prevents popups during travel time calculation
+                marker.on('click', () => {
+                    // Close travel information window if it's open
+                    const distanceOverlay = document.getElementById('distance-overlay');
+                    if (distanceOverlay && distanceOverlay.classList.contains('active')) {
+                        distanceOverlay.classList.remove('active');
+                        // Remove the route line and routing control if they exist
+                        if (routeLine) {
+                            map.removeLayer(routeLine);
+                            routeLine = null;
+                        }
+                        if (routingControl) {
+                            map.removeControl(routingControl);
+                            routingControl = null;
+                        }
+                    }
+
+                    if (calculatingTravelTime) {
+                        // Close any open popups first
+                        map.eachLayer((layer) => {
+                            if (layer instanceof L.Marker) {
+                                layer.closePopup();
+                            }
+                        });
+                        handleMarkerClick(location, marker);
+                    } else {
+                        // Close any open popups first
+                        map.eachLayer((layer) => {
+                            if (layer instanceof L.Marker) {
+                                layer.closePopup();
+                            }
+                        });
+                        marker.openPopup();
+                    }
+                });
+
+                // Override the default popup opening behavior
+                marker.off('popupopen').on('popupopen', (e) => {
+                    if (calculatingTravelTime) {
+                        // Prevent popup from opening during travel time calculation
+                        marker.closePopup();
+                    }
+                });
+            });
+        }
+
+        let calculatingTravelTime = false;
+        let startLocation = null;
+
+        function createPopupContent(location) {
+            const escapedName = location.name.replace(/'/g, "\\'");
+            const websiteLink = location.name === "Sumba Sunset Cliff" 
+                ? '<a href="https://www.sumbasunsetcliff.com" target="_blank" class="website-link"><i class="fas fa-globe"></i> Visit Website</a>'
+                : '';
+            
+            return `
+                <div class="location-popup">
+                    <div class="image-placeholder">Add Image</div>
+                    <div class="popup-content">
+                <h3>${location.name}</h3>
+                        ${websiteLink}
+                <p>${location.description}</p>
+                        <button class="travel-time-btn" onclick="startTravelTimeCalculation('${escapedName}')">
+                            Calculate Travel Time
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getAverageSpeed(start, end) {
+            // Base speed in km/h
+            let baseSpeed = 40;
+            
+            // Adjust speed based on location types
+            const startType = getLocationType(start);
+            const endType = getLocationType(end);
+            
+            // If either location is a transport hub, use higher speed
+            if (startType === 'transport' || endType === 'transport') {
+                baseSpeed = 50; // Higher speed for transport hubs
+            }
+            // If both locations are tourist spots, use lower speed
+            else if (startType === 'tourist' && endType === 'tourist') {
+                baseSpeed = 35; // Lower speed for tourist routes
+            }
+            // If either location is a hotel, use moderate speed
+            else if (startType === 'hotels' || endType === 'hotels') {
+                baseSpeed = 45; // Moderate speed for hotel routes
+            }
+            
+            return baseSpeed;
+        }
+
+        function getLocationType(location) {
+            // Check each category in locations object
+            for (const [category, locs] of Object.entries(locations)) {
+                if (locs.some(loc => loc.name === location.name)) {
+                    return category;
+                }
+            }
+            return 'other';
+        }
+
+        function handleMarkerClick(location, marker) {
+            if (calculatingTravelTime) {
+                // If clicking the same location, just return
+                if (startLocation && location.name === startLocation.name) {
+                    return;
+                }
+                
+                // If this is the first location, set it as start location
+                if (!startLocation) {
+                    startLocation = location;
+                    // Close all popups
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Marker) {
+                            layer.closePopup();
+                        }
+                    });
+                    
+                    // Show the selection prompt
+                    const selectionPrompt = document.querySelector('.selection-prompt');
+                    if (selectionPrompt) {
+                        selectionPrompt.classList.add('active');
+                    }
+
+                    // Show reset button
+                    document.getElementById('reset-button').classList.add('active');
+                    return;
+                }
+
+                // Create Google Maps directions URL
+                const directionsUrl = `https://www.google.com/maps/dir/?api=1&origin=${startLocation.position[0]},${startLocation.position[1]}&destination=${location.position[0]},${location.position[1]}&travelmode=driving`;
+                
+                // Check if location is Sumba Sunset Cliff for website link
+                const websiteLink = location.name === "Sumba Sunset Cliff" 
+                    ? '<a href="https://www.sumbasunsetcliff.com" target="_blank" class="website-link"><i class="fas fa-globe"></i> Visit Website</a>'
+                    : '';
+
+                // Create or update the overlay
+                let existingOverlay = document.getElementById('distance-overlay');
+                if (!existingOverlay) {
+                    existingOverlay = document.createElement('div');
+                    existingOverlay.id = 'distance-overlay';
+                    existingOverlay.className = 'distance-overlay';
+                    document.body.appendChild(existingOverlay);
+                }
+
+                existingOverlay.innerHTML = `
+                    <button class="distance-overlay-close" onclick="closeTravelTime()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <div class="distance-overlay-content">
+                        <h3>Travel Information</h3>
+                        <div class="location-details">
+                            <h4>From: ${startLocation.name}</h4>
+                            <p>${startLocation.description}</p>
+                            
+                            <h4>To: ${location.name}</h4>
+                            ${websiteLink}
+                            <p>${location.description}</p>
+                        </div>
+                        <div class="travel-details" style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(0,0,0,0.1);">
+                            <p style="color: var(--text-light); font-size: 14px; margin-bottom: 16px;">
+                                Click the button below to get accurate travel directions, including real-time traffic conditions and road information.
+                            </p>
+                            <a href="${directionsUrl}" target="_blank" class="directions-link">
+                                <i class="fas fa-directions"></i> Get Directions on Google Maps
+                            </a>
+                        </div>
+                    </div>
+                `;
+                existingOverlay.classList.add('active');
+
+                // Remove existing route if any
+                if (routingControl) {
+                    map.removeControl(routingControl);
+                }
+                if (routeLine) {
+                    map.removeLayer(routeLine);
+                }
+
+                // Create route following roads
+                routingControl = L.Routing.control({
+                    waypoints: [
+                        L.latLng(startLocation.position[0], startLocation.position[1]),
+                        L.latLng(location.position[0], location.position[1])
+                    ],
+                    routeWhileDragging: false,
+                    showAlternatives: false,
+                    fitSelectedRoutes: false,
+                    lineOptions: {
+                        styles: [
+                            {
+                                color: '#FF5A5F',
+                                weight: 3,
+                                opacity: 0.8,
+                                dashArray: '10, 10'
+                            }
+                        ]
+                    },
+                    createMarker: function() { return null; },
+                    addWaypoints: false,
+                    draggableWaypoints: false,
+                    show: false
+                }).addTo(map);
+
+                // Add route event handler
+                routingControl.on('routesfound', function(e) {
+                    const routes = e.routes;
+                    const coords = routes[0].coordinates;
+                    
+                    // Remove existing route line if any
+                    if (routeLine) {
+                        map.removeLayer(routeLine);
+                    }
+                    
+                    // Create new route line with dotted style
+                    routeLine = L.polyline(coords, {
+                        color: '#FF5A5F',
+                        weight: 3,
+                        opacity: 0.8,
+                        dashArray: '10, 10'
+                    }).addTo(map);
+
+                    // Fit the map to show the route
+                    map.fitBounds(routeLine.getBounds(), {
+                        padding: [50, 50]
+                    });
+                });
+
+                // Reset calculation state
+                calculatingTravelTime = false;
+                startLocation = null;
+                
+                // Hide the selection prompt
+                const selectionPrompt = document.querySelector('.selection-prompt');
+                if (selectionPrompt) {
+                    selectionPrompt.classList.remove('active');
+                }
+
+                // Hide reset button after calculation
+                document.getElementById('reset-button').classList.remove('active');
+            } else {
+                // If not calculating travel time, just show the popup
+                marker.openPopup();
+            }
+        }
+
+        function startTravelTimeCalculation(locationName) {
+            let location;
+            
+            if (locationName === "Sumba Sunset Cliff") {
+                location = {
+                    name: "Sumba Sunset Cliff",
+                    position: [-9.425511, 119.054617],
+                    description: "A stunning oceanfront getaway set to become a top spot in West Sumba. Sitting on a high coastal cliff, this hidden gem offers wide-open sunset views over the endless blue sea. With its clear waters, rich marine life, and peaceful surroundings, it's a perfect place for snorkeling, swimming, and relaxing in nature."
+                };
+            } else {
+                location = Object.values(locations)
+                    .flat()
+                    .find(loc => loc.name === locationName);
+            }
+            
+            if (location) {
+                calculatingTravelTime = true;
+                startLocation = location;
+                
+                // Close any open popups and overlays
+                map.eachLayer((layer) => {
+                    if (layer instanceof L.Marker) {
+                        layer.closePopup();
+                    }
+                });
+                
+                // Close any existing travel time overlay
+                const existingOverlay = document.getElementById('distance-overlay');
+                if (existingOverlay) {
+                    existingOverlay.classList.remove('active');
+                }
+                
+                // Show the selection prompt
+                const selectionPrompt = document.querySelector('.selection-prompt');
+                if (selectionPrompt) {
+                    selectionPrompt.classList.add('active');
+                }
+
+                // Show reset button
+                document.getElementById('reset-button').classList.add('active');
+            }
+        }
+
+        function getHaversineDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function resetSelection() {
+            selectedLocations.forEach(({ marker }) => {
+                marker._icon.style.opacity = '1';
+            });
+            selectedLocations = [];
+            document.getElementById('distance-overlay').classList.remove('active');
+            document.getElementById('reset-button').classList.remove('active');
+            
+            // Remove the route line and routing control if they exist
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            
+            // Hide the selection prompt
+            const selectionPrompt = document.querySelector('.selection-prompt');
+            if (selectionPrompt) {
+                selectionPrompt.classList.remove('active');
+            }
+        }
+
+        function closeTravelTime() {
+            const distanceOverlay = document.getElementById('distance-overlay');
+            if (distanceOverlay) {
+                distanceOverlay.classList.remove('active');
+            }
+            calculatingTravelTime = false;
+            startLocation = null;
+            
+            // Remove the route line and routing control if they exist
+            if (routeLine) {
+                map.removeLayer(routeLine);
+                routeLine = null;
+            }
+            if (routingControl) {
+                map.removeControl(routingControl);
+                routingControl = null;
+            }
+            
+            // Hide the selection prompt
+            const selectionPrompt = document.querySelector('.selection-prompt');
+            if (selectionPrompt) {
+                selectionPrompt.classList.remove('active');
+            }
+            
+            // Hide reset button
+            document.getElementById('reset-button').classList.remove('active');
+        }
+
+        function showWelcomeTip() {
+            // Only show if it hasn't been shown before
+            if (!localStorage.getItem('welcomeTipShown')) {
+                const welcomeTip = document.getElementById('welcome-tip');
+                const overlay = document.createElement('div');
+                overlay.className = 'welcome-tip-overlay';
+                document.body.appendChild(overlay);
+                
+                welcomeTip.style.display = 'block';
+                overlay.style.display = 'block';
+            }
+        }
+
+        function closeWelcomeTip() {
+            const welcomeTip = document.getElementById('welcome-tip');
+            const overlay = document.querySelector('.welcome-tip-overlay');
+            
+            welcomeTip.style.display = 'none';
+            if (overlay) {
+                overlay.remove();
+            }
+            localStorage.setItem('welcomeTipShown', 'true');
+        }
+
+        // Initialize map when DOM is ready
+        window.addEventListener('load', initMap);
+        document.getElementById('reset-button').addEventListener('click', resetSelection);
+    </script>
+</body>
+</html>
