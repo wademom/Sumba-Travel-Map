@@ -1,0 +1,1040 @@
+/* Variables */
+:root {
+    --primary-color: #FF5A5F;
+    --text-dark: #484848;
+    --text-light: #767676;
+    --white: #FFFFFF;
+    --background-light: #F7F7F7;
+    
+    /* Icon Colors */
+    --icon-water: #4A90E2;
+    --icon-cliff: #FC642D;
+    --icon-house: #484848;
+    --icon-wave: #00A699;
+    --icon-hill: #8E6E53;
+    --icon-tomb: #767676;
+    --icon-transport: #FFB400;
+    --icon-park: #7AB800;
+    --icon-river: #4A90E2;
+    --icon-dining: #FF5A5F;
+    --icon-surf: #00A699;
+}
+
+/* Base Styles */
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Map Container */
+#map {
+    height: 100vh;
+    width: 100%;
+    z-index: 1;
+}
+
+/* Location Labels */
+.location-label {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--text-dark);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+    transition: opacity 0.2s ease-in-out;
+    white-space: nowrap;
+    text-align: center;
+    pointer-events: none;
+    letter-spacing: 0.2px;
+    display: none;
+    min-width: fit-content;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    z-index: 1000;
+    margin-top: 4px;
+}
+
+.location-label .label-content {
+    display: inline-block;
+    padding: 0 4px;
+}
+
+.location-label.hidden {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+
+/* Location Markers */
+.location-marker {
+    width: 24px !important;
+    height: 24px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease;
+    transform-origin: center center;
+}
+
+.location-marker:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+/* Icon Base Styles - Force Airbnb Red */
+.location-marker i,
+.location-marker .material-icons,
+.location-marker .fa-solid,
+.location-marker .fa-regular,
+.location-marker .fa-brands,
+.location-marker .bi,
+.location-marker .lucide {
+    font-size: 14px !important;
+    color: var(--primary-color) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+/* Override any potential icon color classes */
+.location-icon[class*="icon-"] i,
+.location-icon[class*="icon-"] .fa-solid,
+.location-icon[class*="icon-"] .fa-regular,
+.location-icon[class*="icon-"] .fa-brands,
+.location-icon[class*="icon-"] .bi,
+.location-icon[class*="icon-"] .lucide {
+    color: var(--primary-color) !important;
+}
+
+/* Icon Library Container */
+.icon-library {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Popup Styling */
+.leaflet-popup {
+    margin-bottom: 16px;
+    z-index: 1000;
+}
+
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    overflow: hidden;
+    padding: 0;
+    background: white;
+}
+
+.leaflet-popup-content {
+    margin: 0;
+    width: 320px !important;
+}
+
+.leaflet-popup-tip {
+    display: none;
+}
+
+.location-popup {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.image-container {
+    width: 100%;
+    height: 180px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+.location-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: var(--background-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 13px;
+}
+
+.popup-content {
+    padding: 24px;
+}
+
+.popup-content h3 {
+    margin: 0 0 12px 0;
+    color: var(--text-dark);
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.popup-content p {
+    margin: 0 0 24px 0;
+    color: var(--text-light);
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/* Travel Time Button */
+.travel-time-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.travel-time-btn i {
+    margin-right: 6px;
+    font-size: 14px;
+}
+
+.travel-time-btn:hover {
+    background-color: #FF4B4F;
+}
+
+/* Travel Information Window */
+.distance-overlay {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
+    width: 90%;
+    max-width: 400px;
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+    transition: all 0.3s ease;
+}
+
+.distance-overlay.active {
+    display: flex;
+    animation: slideUp 0.3s ease;
+}
+
+.distance-overlay-content {
+    position: relative;
+    width: 100%;
+}
+
+.distance-overlay-close {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    transition: all 0.2s ease;
+    z-index: 1;
+}
+
+.distance-overlay-close:hover {
+    background: #f5f5f5;
+    color: #333;
+}
+
+.location-details {
+    margin-bottom: 16px;
+}
+
+.location-details h4 {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.location-details p {
+    color: #333;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 12px;
+}
+
+.travel-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.travel-details p {
+    color: #666;
+    font-size: 14px;
+}
+
+.directions-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.directions-link:hover {
+    background: #e61e4d;
+    transform: translateY(-1px);
+}
+
+.directions-link i {
+    font-size: 16px;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    .distance-overlay {
+        bottom: 0;
+        left: 0;
+        right: 0;
+        transform: none;
+        width: 100%;
+        max-width: none;
+        border-radius: 12px 12px 0 0;
+        padding: 16px;
+    }
+
+    .distance-overlay-content.mobile {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Mobile specific styles */
+.distance-overlay-content.mobile {
+    padding: 24px;
+}
+
+.distance-overlay-content.mobile h3 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    padding-right: 24px;
+}
+
+.distance-overlay-content.mobile h4 {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.distance-overlay-content.mobile p {
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+
+@media (max-width: 768px) {
+    .distance-overlay {
+        width: 92%;
+        max-width: 400px;
+    }
+
+    .website-link {
+        font-size: 13px;
+        padding: 5px 10px;
+    }
+}
+
+/* Selection Prompt */
+.selection-prompt {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    display: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    white-space: nowrap;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.selection-prompt.active {
+    display: block;
+    opacity: 1;
+}
+
+/* Reset Button */
+#reset-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    display: none;
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+#reset-button.active {
+    display: flex;
+    opacity: 1;
+}
+
+#reset-button:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+/* Tip Box */
+.tip-box {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 480px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.tip-box.active {
+    opacity: 1;
+}
+
+.tip-content {
+    padding: 32px;
+    background: linear-gradient(to bottom, #ffffff, #f8f8f8);
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+    position: relative;
+    animation: slideUp 0.5s ease-out;
+}
+
+.tip-instructions {
+    background: #FFD1D1;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+}
+
+.tip-instructions .instruction {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.tip-instructions .instruction:last-child {
+    margin-bottom: 0;
+}
+
+.tip-instructions i {
+    color: var(--primary-color);
+    font-size: 19px;
+    margin-top: 2px;
+}
+
+.tip-instructions p {
+    color: var(--text-dark);
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+    flex: 1;
+}
+
+.tip-box h2 {
+    margin: 0 0 24px 0;
+    color: var(--text-dark);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-align: center;
+}
+
+.tip-ok-button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 12px rgba(255, 56, 92, 0.2);
+    transition: all 0.2s ease;
+    animation: pulse 2s infinite;
+}
+
+.tip-ok-button:hover {
+    background-color: #FF4B4F;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(255, 56, 92, 0.3);
+}
+
+.tip-ok-button:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .tip-box {
+        width: 92%;
+        max-width: 400px;
+        top: 35%;
+    }
+
+    .tip-content {
+        padding: 24px;
+    }
+
+    .tip-box h2 {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
+
+    .tip-instructions {
+        padding: 16px;
+    }
+
+    .tip-instructions p {
+        font-size: 14px;
+    }
+
+    .tip-ok-button {
+        padding: 14px 24px;
+        font-size: 15px;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.info-window-content {
+    padding: 15px;
+    max-width: 300px;
+    position: relative;
+}
+
+.info-window-content h2 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: var(--text-dark);
+}
+
+.info-window-content p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-dark);
+}
+
+.close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    color: var(--text-dark);
+    padding: 5px;
+    line-height: 1;
+}
+
+.close-button:hover {
+    color: var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .info-window-content {
+        max-width: 280px;
+        padding: 12px;
+    }
+    
+    .location-image {
+        height: 180px;
+    }
+    
+    .info-window-content h2 {
+        font-size: 16px;
+    }
+    
+    .info-window-content p {
+        font-size: 13px;
+    }
+}
+
+.popup-photo {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+    margin: 0;
+    position: relative;
+}
+
+.popup-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .popup-photo {
+        height: 240px;
+        border-radius: 16px 16px 0 0;
+    }
+    
+    .custom-popup .leaflet-popup-content {
+        margin: 0;
+    }
+    
+    .custom-popup .leaflet-popup-content-wrapper {
+        padding: 0;
+        border-radius: 16px;
+    }
+    
+    .location-popup {
+        border-radius: 16px;
+    }
+    
+    .popup-content {
+        padding: 20px;
+    }
+
+    .popup-content h3 {
+        font-size: 20px;
+        margin-bottom: 10px;
+    }
+
+    .popup-content p {
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+}
+
+.leaflet-popup-close-button {
+    position: absolute !important;
+    right: 16px !important;
+    top: 16px !important;
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 22px !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-radius: 50% !important;
+    color: #222222 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    transition: all 0.2s ease !important;
+    z-index: 1000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    border: none !important;
+    cursor: pointer !important;
+    text-align: center !important;
+    line-height: 1 !important;
+}
+
+.leaflet-popup-close-button span {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin-top: -2px !important;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .leaflet-popup-close-button {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 22px !important;
+        right: 12px !important;
+        top: 12px !important;
+        background: rgba(255, 255, 255, 0.98) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .leaflet-popup-close-button span {
+        margin-top: -2px !important;
+    }
+
+    .distance-overlay-close {
+        width: 32px;
+        height: 32px;
+        font-size: 22px;
+        right: 12px;
+        top: 12px;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+    }
+
+    .distance-overlay-close span {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        margin-top: -2px;
+    }
+
+    .distance-overlay-content.mobile {
+        padding-top: 28px;  /* Adjusted for new button size */
+    }
+}
+
+/* Location Button - Base Styles */
+.location-button {
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 20px !important;
+    width: 52px !important;
+    height: 52px !important;
+    background: white !important;
+    border: none !important;
+    border-radius: 50% !important;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 99999 !important;
+    transition: all 0.2s ease !important;
+}
+
+.location-button i {
+    color: var(--primary-color) !important;
+    font-size: 22px !important;
+}
+
+.location-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.location-button.active {
+    background: var(--primary-color) !important;
+}
+
+.location-button.active i {
+    color: white !important;
+}
+
+.location-button.error {
+    background: #ff4444 !important;
+}
+
+.location-button.error i {
+    color: white !important;
+}
+
+/* User Location Marker */
+.user-location-marker {
+    width: 12px;
+    height: 12px;
+    background: white;
+    border-radius: 50%;
+    border: 3px solid var(--primary-color);
+    box-shadow: 0 0 0 2px white;
+}
+
+.user-location-accuracy {
+    border: 1px solid var(--primary-color);
+    border-radius: 50%;
+    background: rgba(255, 56, 92, 0.1);
+}
+
+/* Location Button in Overlay */
+.use-location-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 16px 0;
+    padding: 12px;
+    background: white;
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.use-location-btn:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.use-location-btn i {
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .location-button {
+        bottom: 16px;
+        right: 16px;
+        width: 40px;
+        height: 40px;
+    }
+
+    .location-button i {
+        font-size: 16px;
+    }
+
+    .use-location-btn {
+        font-size: 13px;
+        padding: 10px;
+    }
+}
+
+/* New Location Button Styles */
+.use-location-button {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #FF385C;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 500;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.use-location-button:hover {
+    background: #E61E4D;
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.use-location-button:active {
+    transform: translateX(-50%) translateY(0);
+}
+
+.use-location-button i {
+    font-size: 18px;
+}
+
+/* Distance Overlay Updates */
+.distance-overlay-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 90%;
+    width: 320px;
+}
+
+.distance-overlay-content h3 {
+    margin: 0 0 8px 0;
+    color: #333;
+    font-size: 18px;
+}
+
+.distance-overlay-content p {
+    margin: 0 0 16px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.use-current-location-button {
+    background: #FF385C;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.use-current-location-button:hover {
+    background: #E61E4D;
+    transform: translateY(-2px);
+}
+
+.use-current-location-button:active {
+    transform: translateY(0);
+}
+
+.use-current-location-button i {
+    font-size: 16px;
+}
+
+/* Mobile Responsive Updates */
+@media (max-width: 768px) {
+    .use-location-button {
+        bottom: 16px;
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .use-location-button i {
+        font-size: 16px;
+    }
+
+    .distance-overlay-content {
+        padding: 16px;
+        width: 280px;
+    }
+}
+
+/* Direction Options */
+.direction-options {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.use-location-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    justify-content: center;
+}
+
+.use-location-button:hover {
+    background: #e61e4d;
+    transform: translateY(-1px);
+}
+
+.use-location-button i {
+    font-size: 16px;
+}
+
+.or-text {
+    color: #666;
+    font-size: 14px;
+    margin: 0;
+}
+
+.select-destination-text {
+    color: #333;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 0;
+} 
