@@ -220,84 +220,49 @@ function createMarkerIcon(location) {
 
 // Create popup content
 function createPopupContent(location) {
-    const container = document.createElement('div');
-    container.className = 'location-popup';
-
-    // Add photo container if location has a photo
-    if (location.photo) {
-        const photoContainer = document.createElement('div');
-        photoContainer.className = 'image-container';
-        
-        const img = document.createElement('img');
-        img.src = location.photo;
-        img.alt = location.name;
-        img.className = 'location-image';
-        img.loading = 'lazy';
-        img.decoding = 'async';
-        
-        // Add error handling for image
-        img.onerror = () => {
-            console.error(`Failed to load image for ${location.name}`);
-            photoContainer.remove();
-        };
-        
-        photoContainer.appendChild(img);
-        container.appendChild(photoContainer);
-    }
-
     const content = document.createElement('div');
     content.className = 'popup-content';
 
-    const title = document.createElement('h3');
-    title.textContent = location.name;
-
-    const description = document.createElement('p');
-    description.textContent = location.description;
-
-    // Add website link for Sumba Sunset Cliff and Makan Dulu
-    if (location.name === "Sumba Sunset Cliff" || location.name === "Makan Dulu") {
-        console.log('Adding website link for:', location.name);
-        const websiteLink = document.createElement('a');
-        websiteLink.href = location.name === "Sumba Sunset Cliff" 
-            ? "https://sumbasunsetcliff.com" 
-            : "https://www.sumbahospitalityfoundation.org/makandulu/";
-        websiteLink.target = "_blank";
-        websiteLink.className = "website-link";
-        websiteLink.innerHTML = '<i class="fas fa-external-link-alt"></i> Visit website';
-        content.appendChild(websiteLink);
-        console.log('Website link added:', websiteLink);
+    // Add image with lazy loading
+    if (location.image) {
+        const img = document.createElement('img');
+        img.src = `images/${location.image}`;
+        img.alt = location.name;
+        img.loading = 'lazy'; // Add lazy loading
+        img.className = 'popup-image';
+        content.appendChild(img);
     }
 
-    const button = document.createElement('button');
-    button.className = 'travel-time-btn';
-    button.innerHTML = '<i class="fas fa-route"></i> Get Directions From Here';
-    button.onclick = () => {
-        startLocation = location;
-        calculatingTravelTime = true;
-        
-        // Show the selection prompt
-        const selectionPrompt = document.querySelector('.selection-prompt');
-        if (selectionPrompt) {
-            selectionPrompt.textContent = 'Select destination';
-            selectionPrompt.classList.add('active');
-        }
-
-        // Show reset button
-        const resetButton = document.getElementById('reset-button');
-        if (resetButton) {
-            resetButton.classList.add('active');
-        }
-
-        // Close the popup
-        map.closePopup();
-    };
-
+    // Add title
+    const title = document.createElement('h3');
+    title.textContent = location.name;
     content.appendChild(title);
-    content.appendChild(description);
-    content.appendChild(button);
-    container.appendChild(content);
 
-    return container;
+    // Add description
+    if (location.description) {
+        const description = document.createElement('p');
+        description.textContent = location.description;
+        content.appendChild(description);
+    }
+
+    // Add website link if available
+    if (location.website) {
+        const websiteLink = document.createElement('a');
+        websiteLink.href = location.website;
+        websiteLink.textContent = 'Visit Website';
+        websiteLink.target = '_blank';
+        websiteLink.className = 'website-link';
+        content.appendChild(websiteLink);
+    }
+
+    // Add the button
+    const button = document.createElement('button');
+    button.textContent = 'Get Directions From Here';
+    button.className = 'directions-button';
+    button.onclick = () => handleDirectionsClick(location);
+    content.appendChild(button);
+
+    return content;
 }
 
 // Add click handler for markers

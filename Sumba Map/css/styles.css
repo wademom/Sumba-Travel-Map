@@ -837,4 +837,35 @@ body {
 .tip-box.active + #map {
     opacity: 0.5;
     transition: opacity 0.3s ease;
+}
+
+/* Image optimizations */
+.popup-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Add loading placeholder */
+.popup-image:not([src]) {
+    background: #f0f0f0;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* Optimize paint operations */
+.popup-content {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
 } 
