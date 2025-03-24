@@ -223,26 +223,27 @@ function createPopupContent(location) {
     const content = document.createElement('div');
     content.className = 'popup-content';
 
-    // Add image with lazy loading
-    if (location.image) {
-        const img = document.createElement('img');
-        img.src = `images/${location.image}`;
-        img.alt = location.name;
-        img.loading = 'lazy'; // Add lazy loading
-        img.className = 'popup-image';
-        content.appendChild(img);
-    }
+    // Add image
+    const img = document.createElement('img');
+    img.src = `images/${location.name}.png`;
+    img.alt = location.name;
+    img.className = 'popup-image';
+    content.appendChild(img);
+
+    // Add text container
+    const textContainer = document.createElement('div');
+    textContainer.className = 'popup-text';
 
     // Add title
     const title = document.createElement('h3');
     title.textContent = location.name;
-    content.appendChild(title);
+    textContainer.appendChild(title);
 
     // Add description
     if (location.description) {
         const description = document.createElement('p');
         description.textContent = location.description;
-        content.appendChild(description);
+        textContainer.appendChild(description);
     }
 
     // Add website link if available
@@ -252,16 +253,36 @@ function createPopupContent(location) {
         websiteLink.textContent = 'Visit Website';
         websiteLink.target = '_blank';
         websiteLink.className = 'website-link';
-        content.appendChild(websiteLink);
+        textContainer.appendChild(websiteLink);
     }
 
     // Add the button
     const button = document.createElement('button');
-    button.textContent = 'Get Directions From Here';
     button.className = 'directions-button';
-    button.onclick = () => handleDirectionsClick(location);
-    content.appendChild(button);
+    button.innerHTML = '<i class="fas fa-route"></i> Get Directions From Here';
+    button.onclick = () => {
+        startLocation = location;
+        calculatingTravelTime = true;
+        
+        // Show the selection prompt
+        const selectionPrompt = document.querySelector('.selection-prompt');
+        if (selectionPrompt) {
+            selectionPrompt.textContent = 'Select destination';
+            selectionPrompt.classList.add('active');
+        }
 
+        // Show reset button
+        const resetButton = document.getElementById('reset-button');
+        if (resetButton) {
+            resetButton.classList.add('active');
+        }
+
+        // Close the popup
+        map.closePopup();
+    };
+    textContainer.appendChild(button);
+
+    content.appendChild(textContainer);
     return content;
 }
 
